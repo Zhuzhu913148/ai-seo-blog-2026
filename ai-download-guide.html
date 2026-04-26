@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>零基础学会调AI大模型API - AI工具使用指南</title>
+ <meta name="description" content="新手也能跟着做的AI大模型API调用教程，一步一步教你从注册到跑通第一个请求">
+ <style>
+ * {
+ margin: 0;
+ padding: 0;
+ box-sizing: border-box;
+ font-family: "Microsoft YaHei", sans-serif;
+ }
+ body {
+ background-color: #f0f4f8;
+ color: #333;
+ line-height: 1.8;
+ max-width: 800px;
+ margin: 0 auto;
+ padding: 2rem 1rem;
+ }
+ h1 {
+ color: #2563eb;
+ margin-bottom: 1rem;
+ padding-bottom: 0.5rem;
+ border-bottom: 2px solid #e2e8f0;
+ }
+ h2 {
+ color: #1e40af;
+ margin-top: 2rem;
+ margin-bottom: 0.8rem;
+ padding-left: 0.5rem;
+ border-left: 4px solid #2563eb;
+ }
+ p {
+ margin-bottom: 1rem;
+ font-size: 1.05rem;
+ }
+ ul, ol {
+ margin-bottom: 1rem;
+ padding-left: 2rem;
+ }
+ li {
+ margin-bottom: 0.5rem;
+ }
+ strong {
+ color: #1e293b;
+ }
+ pre {
+ background: #1e293b;
+ color: #e2e8f0;
+ padding: 1rem;
+ border-radius: 8px;
+ overflow-x: auto;
+ margin-bottom: 1rem;
+ font-size: 0.95rem;
+ line-height: 1.6;
+ }
+ code {
+ font-family: "Consolas", "Monaco", monospace;
+ }
+ p code, li code {
+ background: #e2e8f0;
+ padding: 0.15rem 0.4rem;
+ border-radius: 4px;
+ font-size: 0.9em;
+ color: #1e40af;
+ }
+ hr {
+ border: none;
+ border-top: 1px solid #cbd5e1;
+ margin: 2rem 0;
+ }
+ .back-link {
+ display: inline-block;
+ margin-top: 2rem;
+ color: #2563eb;
+ text-decoration: none;
+ font-weight: bold;
+ }
+ </style>
+</head>
+<body>
+
+ <h1>零基础学会调AI大模型API——新手保姆级避坑指南</h1>
+
+ <p>前阵子一个做产品的朋友问我："我想让AI帮我批量写文案，怎么搞？"我当时心想这还不简单，结果帮他一通操作下来，发现他连API是什么都没搞明白，卡在最基础的注册充值环节就原地打转了。</p>
+
+ <p>后来我在几个技术群里问了一圈，发现这种情况特别普遍——好多想玩AI的新手，第一步就死在了"怎么调API"上。所以今天我就把这些坑一条条捋清楚，当给新手朋友们的一份保姆级攻略。</p>
+
+ <hr>
+
+ <h2>先说第一步：搞清楚你要调哪个模型</h2>
+
+ <p>别急着写代码，先想清楚你要用谁家的模型。现在主流的就那么几家：</p>
+
+ <ul>
+ <li><strong>OpenAI</strong>：GPT-4o、GPT-4o-mini，效果稳但得翻墙</li>
+ <li><strong>DeepSeek</strong>：国产之光，价格便宜量大管饱</li>
+ <li><strong>通义千问</strong>：阿里家的，中文能力强</li>
+ <li><strong>智谱GLM</strong>：也是国产，API文档写得比较友好</li>
+ </ul>
+
+ <p>划重点——新手别上来就追求"最强的"，先选一个<strong>能用的、便宜</strong>的练手。我推荐先从DeepSeek开始，注册送额度，API格式基本兼容OpenAI，写好的代码以后换模型几乎不用改。</p>
+
+ <p>我第一次玩的时候犯了个蠢，直接冲OpenAI的GPT-4，光充值就折腾半天，信用卡还被拒了两次，最后还是找朋友帮忙搞定的。你们别学我，先用国内的试试水。</p>
+
+ <hr>
+
+ <h2>第二步：拿到你的API Key</h2>
+
+ <p>这步看着简单，但90%的新手会卡在这里。</p>
+
+ <p>去你选定的平台官网，注册账号，然后找到"API Keys"或者"密钥管理"之类的入口，点创建，复制下来保存好。</p>
+
+ <p>几个要命的问题：</p>
+
+ <ol>
+ <li><strong>Key只显示一次</strong>，关了页面就再也看不到了。我当时创建完随手关了浏览器，结果只能删了重新生成一个。一定记得先复制到记事本里存着。</li>
+ <li><strong>别把Key发到任何公开地方</strong>。发GitHub、发群里、截图发朋友圈，都不行。我见过有人在Discord里晒自己的Key，结果半天就被刷了几百刀。拿来自己本地测试就好。</li>
+ <li>有些平台需要先<strong>绑定手机号或者实名认证</strong>才能调API，提前准备好，别等到最后一步才发现。</li>
+ </ol>
+
+ <hr>
+
+ <h2>第三步：写你的第一行调用代码</h2>
+
+ <p>到了最核心的环节了。别怕，真的就几行代码的事。</p>
+
+ <p>我建议用Python，生态最好，报错信息也最容易看懂。先装个requests库：</p>
+
+<pre><code>pip install requests</code></pre>
+
+ <p>然后写这么几行：</p>
+
+<pre><code>import requests
+
+url = "https://api.deepseek.com/chat/completions"
+headers = {
+    "Authorization": "Bearer 你的API_Key放这里",
+    "Content-Type": "application/json"
+}
+data = {
+    "model": "deepseek-chat",
+    "messages": [{"role": "user", "content": "你好，帮我写一句广告语"}],
+    "temperature": 0.7
+}
+
+response = requests.post(url, headers=headers, json=data)
+print(response.json()["choices"][0]["message"]["content"])</code></pre>
+
+ <p>运行一下，如果看到AI返回的广告语，恭喜你，你已经入门了。</p>
+
+ <p>划重点——<strong>headers里的Bearer和Key之间有个空格</strong>，别漏了。还有Key别加引号，它本身就是一个字符串。我第一次写的时候把整个<code>Bearer sk-xxx</code>加了双引号，结果一直报401，排查了快二十分钟才发现。</p>
+
+ <hr>
+
+ <h2>第四步：理解返回结果，别拿到就跑</h2>
+
+ <p>很多人拿到AI回复就高兴得收工了，但返回的JSON里还有几个关键信息你得知道：</p>
+
+ <ul>
+ <li><strong>usage字段</strong>：告诉你这次调用花了多少token。token就是你花钱的单位，输入token和输出token分别计费。新手一定要养成看这个字段的习惯，不然哪天账单爆炸都不知道怎么回事。</li>
+ <li><strong>finish_reason</strong>：如果是<code>stop</code>说明正常结束了，如果是<code>length_limit</code>说明你的回答被截断了，要调大<code>max_tokens</code>参数。</li>
+ </ul>
+
+ <p>我有个朋友测试的时候没注意usage，写了个循环批量调用，跑了半小时才想起来看一眼余额——已经扣了快200块。血泪教训。</p>
+
+ <hr>
+
+ <h2>最后跟大家说句实在话</h2>
+
+ <p>新手玩API，最大的坑不是技术，是<strong>心态</strong>。</p>
+
+ <p>别一上来就想搞什么复杂的多轮对话、RAG检索增强、智能体编排。先老老实实把最基础的请求-响应跑通，搞懂model、messages、temperature这几个参数是干嘛的。就像学开车，你得先把车开起来，再去琢磨漂移。</p>
+
+ <p>还有一点，<strong>别乱装各种第三方封装库</strong>。网上很多"一行代码调用AI"的库，看着省事，但更新慢、兼容性差、有的还偷偷收集你的Key。原生的requests或者官方SDK最稳，虽然多写几行代码，但出了问题你至少知道该去哪里查。</p>
+
+ <p>最后，API的坑我前面说的这些只是一部分。你实际操作的时候大概率还会遇到网络超时、模型下线维护、余额不足之类的各种小问题。别慌，报错信息复制下来丢给AI，它比大多数教程都好使。</p>
+
+ <p>祝大家折腾顺利 🎉</p>
+
+ <a href="/" class="back-link">← 返回首页</a>
+
+</body>
+</html>
